@@ -1,0 +1,1290 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>ASCII Body · Generative Art Collection</title>
+  <meta name="description" content="ASCII Body — a collection of nine p5.js works that transform feminine body photographs into ASCII art. Gaia, Grapefruit, SyberLust, Brownie, Kitty, Honey, Eve, Valentine, Lilith, and Venus." />
+  <meta name="theme-color" content="#0a0a0a" />
+  <link rel="icon" type="image/svg+xml" href="images/fav.svg">
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet" />
+
+  <style>
+    :root {
+      --bg: #0a0a0a;
+      --bg-soft: #0f0f0e;
+      --paper: #f4f1ea;
+      --paper-soft: #ebe6db;
+      --ink: #141414;
+      --ink-soft: #5a5650;
+      --gold: #b8935a;
+      --gold-soft: #d4b483;
+      --gold-deep: #80633b;
+      --line: rgba(244, 241, 234, 0.10);
+      --line-dark: rgba(20, 20, 20, 0.14);
+      --text: rgba(244, 241, 234, 0.88);
+      --text-dim: rgba(244, 241, 234, 0.48);
+      --text-faint: rgba(244, 241, 234, 0.22);
+      --serif: "Cormorant Garamond", Georgia, serif;
+      --mono: "DM Mono", ui-monospace, monospace;
+      --page: min(1180px, calc(100% - 64px));
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html { scroll-behavior: smooth; background: var(--bg); overflow-x: hidden; }
+    body {
+      background: var(--bg); color: var(--text); font-family: var(--mono);
+      font-size: 13px; line-height: 1.6;
+      -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale;
+      overflow-x: hidden; width: 100%;
+    }
+    a { color: inherit; text-decoration: none; }
+    button { font: inherit; }
+    img, canvas { display: block; max-width: 100%; height: auto; }
+    ::selection { background: var(--gold); color: var(--bg); }
+
+    .page { width: var(--page); margin: 0 auto; max-width: 100%; }
+    .eyebrow { display: inline-block; color: var(--gold-soft); font-size: 10px; letter-spacing: 0.24em; text-transform: uppercase; }
+    .section { padding: 140px 0; border-top: 1px solid var(--line); }
+    .section-head { display: grid; grid-template-columns: 160px 1fr; gap: 40px; margin-bottom: 80px; align-items: baseline; }
+    .section-number { color: var(--text-faint); font-size: 10px; letter-spacing: 0.24em; text-transform: uppercase; }
+    .section-title { font-family: var(--serif); font-size: clamp(2.6rem, 5.4vw, 4.8rem); font-weight: 300; line-height: 1.02; letter-spacing: -0.02em; color: var(--paper); }
+    .section-title em { font-style: italic; color: var(--gold-soft); }
+
+    .ribbon {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+      display: flex; justify-content: space-between; align-items: center;
+      gap: 20px; padding: 18px 32px;
+      background: rgba(10, 10, 10, 0.72);
+      backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
+      border-bottom: 1px solid var(--line);
+      font-family: var(--mono); font-size: 10px; letter-spacing: 0.22em;
+      text-transform: uppercase; color: var(--text-faint);
+    }
+    .ribbon-brand { font-family: var(--serif); font-size: 18px; letter-spacing: -0.01em; text-transform: none; color: var(--paper); flex-shrink: 0; }
+    .ribbon-brand em { color: var(--gold-soft); font-style: italic; }
+    .ribbon-nav { display: flex; gap: 28px; overflow-x: auto; overflow-y: hidden; scrollbar-width: none; -ms-overflow-style: none; -webkit-overflow-scrolling: touch; flex-shrink: 1; min-width: 0; }
+    .ribbon-nav::-webkit-scrollbar { display: none; }
+    .ribbon-nav a { transition: color 300ms ease; white-space: nowrap; flex-shrink: 0; }
+    .ribbon-nav a:hover { color: var(--gold-soft); }
+    @media (max-width: 720px) {
+      .ribbon { padding: 12px 16px; gap: 14px; }
+      .ribbon-brand { font-size: 15px; }
+      .ribbon-nav { gap: 18px; font-size: 9px; mask-image: linear-gradient(to right, black 0, black calc(100% - 20px), transparent 100%); -webkit-mask-image: linear-gradient(to right, black 0, black calc(100% - 20px), transparent 100%); }
+    }
+
+    .cover { min-height: 100vh; min-height: 100dvh; padding: 120px 0 60px; display: flex; flex-direction: column; justify-content: space-between; gap: 60px; }
+    .cover-meta { display: flex; justify-content: space-between; align-items: baseline; gap: 16px; flex-wrap: wrap; font-family: var(--mono); font-size: 10px; letter-spacing: 0.22em; text-transform: uppercase; color: var(--text-faint); }
+    .cover-meta .vol { color: var(--gold-soft); }
+    .cover-body { display: grid; grid-template-columns: 1fr; gap: 60px; align-items: center; flex: 1; }
+    @media (min-width: 900px) { .cover-body { grid-template-columns: 1.05fr 0.95fr; gap: 80px; } }
+    .cover-text { display: flex; flex-direction: column; gap: 32px; }
+    .cover-title { font-family: var(--serif); font-weight: 300; font-size: clamp(3.5rem, 8.5vw, 8rem); line-height: 0.92; letter-spacing: -0.03em; color: var(--paper); }
+    .cover-title em { font-style: italic; color: var(--gold-soft); display: block; }
+    .cover-sub { font-family: var(--serif); font-size: clamp(1.3rem, 1.9vw, 1.7rem); font-weight: 300; font-style: italic; line-height: 1.4; color: var(--text-dim); max-width: 500px; }
+    .cover-desc { color: var(--text-dim); font-size: 13px; line-height: 1.8; max-width: 460px; }
+    .cover-art { position: relative; aspect-ratio: 1; background: #000; border: 1px solid var(--line); overflow: hidden; max-width: 520px; margin-left: auto; width: 100%; }
+    .cover-art img { width: 100%; height: 100%; object-fit: cover; display: block; }
+    @media (max-width: 720px) {
+      .cover { padding: 100px 0 40px; gap: 40px; }
+      .cover-title { font-size: clamp(3rem, 16vw, 5rem); }
+      .cover-art { margin: 0 auto; }
+    }
+    .cover-foot { display: grid; grid-template-columns: repeat(3, 1fr); gap: 40px; padding-top: 32px; border-top: 1px solid var(--line); font-family: var(--mono); font-size: 10px; letter-spacing: 0.22em; text-transform: uppercase; color: var(--text-faint); }
+    .cover-foot .k { display: block; color: var(--gold-soft); margin-bottom: 8px; }
+    .cover-foot .v { color: var(--text-dim); letter-spacing: 0.1em; line-height: 1.7; }
+    @media (max-width: 720px) { .cover-foot { grid-template-columns: 1fr; gap: 20px; } }
+
+    .statement { background: var(--bg-soft); border-top: 1px solid var(--line); padding: 140px 0; }
+    .statement-inner { display: grid; grid-template-columns: 200px 1fr; gap: 60px; align-items: start; }
+    .statement-label { position: sticky; top: 100px; font-family: var(--mono); font-size: 10px; letter-spacing: 0.24em; text-transform: uppercase; color: var(--gold-soft); }
+    .statement-label .num { display: block; color: var(--text-faint); margin-bottom: 8px; }
+    .statement-body { max-width: 720px; display: flex; flex-direction: column; gap: 28px; }
+    .statement-lead { font-family: var(--serif); font-size: clamp(1.6rem, 3vw, 2.6rem); font-weight: 300; line-height: 1.25; letter-spacing: -0.01em; color: var(--paper); }
+    .statement-lead em { font-style: italic; color: var(--gold-soft); }
+    .statement-body p { color: var(--text-dim); font-size: 13.5px; line-height: 1.9; max-width: 62ch; }
+    .statement-body p strong { color: var(--text); font-weight: 500; }
+    .statement-ai { margin-top: 24px; padding: 22px 26px; border-left: 2px solid var(--gold); background: rgba(184, 147, 90, 0.04); color: var(--text-dim); font-size: 12.5px; line-height: 1.8; font-style: italic; }
+    .statement-ai strong { color: var(--gold-soft); font-style: normal; font-weight: 500; letter-spacing: 0.02em; }
+    @media (max-width: 900px) { .statement { padding: 90px 0; } .statement-inner { grid-template-columns: 1fr; gap: 28px; } .statement-label { position: static; } }
+    @media (max-width: 720px) { .statement { padding: 72px 0; } .statement-ai { padding: 18px 20px; font-size: 12px; } }
+
+    /* Works grid */
+    .works-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 60px;
+      align-items: start;
+    }
+    @media (max-width: 900px) { .works-grid { grid-template-columns: 1fr; gap: 80px; } }
+
+    .work-card { display: flex; flex-direction: column; gap: 24px; }
+    .work-card-head {
+      display: flex; justify-content: space-between; align-items: baseline;
+      font-family: var(--mono); font-size: 10px; letter-spacing: 0.24em;
+      text-transform: uppercase;
+    }
+    .work-card-index { color: var(--gold-soft); }
+    .work-card-edition { color: var(--text-faint); }
+    .work-card-art {
+      position: relative;
+      aspect-ratio: 1;
+      background: #000;
+      border: 1px solid var(--line);
+      overflow: hidden;
+    }
+    .work-card-art img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+    .work-card-title { font-family: var(--serif); font-size: clamp(1.8rem, 2.6vw, 2.4rem); font-weight: 300; line-height: 1.05; letter-spacing: -0.01em; color: var(--paper); }
+    .work-card-title em { font-style: italic; color: var(--gold-soft); display: block; }
+    .work-card-desc { color: var(--text-dim); font-size: 12.5px; line-height: 1.8; max-width: 46ch; }
+    .work-card-meta {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px 24px;
+      padding-top: 20px;
+      border-top: 1px solid var(--line);
+      font-family: var(--mono); font-size: 10px; letter-spacing: 0.14em;
+      text-transform: uppercase;
+    }
+    .work-card-meta .k { color: var(--text-faint); display: block; margin-bottom: 6px; }
+    .work-card-meta .v { color: var(--paper); }
+
+    /* Process grid */
+    .process-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1px; background: var(--line); border: 1px solid var(--line); }
+    .process-card { min-height: 340px; padding: 44px 40px; background: var(--bg); display: flex; flex-direction: column; }
+    .process-number { color: var(--gold); font-size: 10px; letter-spacing: 0.22em; text-transform: uppercase; }
+    .process-card h3 { margin: auto 0 20px; font-family: var(--serif); font-size: 2.2rem; font-weight: 300; line-height: 1.05; letter-spacing: -0.02em; color: var(--paper); }
+    .process-card p { max-width: 300px; color: var(--text-dim); font-size: 12.5px; line-height: 1.8; }
+    @media (max-width: 900px) { .process-grid { grid-template-columns: 1fr; } .process-card { min-height: auto; padding: 36px 32px; } .process-card h3 { margin-top: 32px; } }
+    @media (max-width: 720px) { .process-card { padding: 28px 24px; } }
+
+    /* Surfaces */
+    .application { background: var(--paper); color: var(--ink); border-top: 0; padding: 140px 0; }
+    .application .section-number { color: rgba(20, 20, 20, 0.4); }
+    .application .section-title { color: var(--ink); }
+    .application .section-title em { color: var(--gold-deep); }
+    .application-intro { max-width: 640px; margin: 0 0 80px auto; font-family: var(--serif); font-size: clamp(1.5rem, 2.4vw, 2.2rem); font-weight: 300; line-height: 1.25; letter-spacing: -0.01em; color: var(--ink); }
+    .application-intro span { color: var(--ink-soft); font-style: italic; }
+
+    .surface-work-head {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 60px;
+      margin: 60px 0 32px; padding-bottom: 24px;
+      border-bottom: 1px solid var(--line-dark);
+      align-items: baseline;
+    }
+    .surface-work-head:first-of-type { margin-top: 0; }
+    .surface-work-head h3 { font-family: var(--serif); font-size: clamp(1.6rem, 2.4vw, 2.2rem); font-weight: 300; line-height: 1.15; letter-spacing: -0.01em; color: var(--ink); }
+    .surface-work-head h3 em { font-style: italic; color: var(--gold-deep); }
+    .surface-work-head p { max-width: 44ch; color: var(--ink-soft); font-size: 12.5px; line-height: 1.75; }
+
+    .surface-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1px; background: var(--line-dark); border: 1px solid var(--line-dark); }
+    .surface-item { background: var(--paper); padding: 24px 20px 18px; display: flex; flex-direction: column; gap: 16px; }
+    .surface-item .surface-label { display: flex; justify-content: space-between; align-items: baseline; font-family: var(--mono); font-size: 9px; letter-spacing: 0.22em; text-transform: uppercase; color: rgba(20, 20, 20, 0.5); }
+    .surface-item .surface-label .num { color: var(--gold-deep); }
+    .surface-item .surface-tile {
+      position: relative;
+      width: 100%;
+      background: #000;
+      overflow: hidden;
+      background-repeat: repeat;
+      background-position: center;
+      background-size: contain;
+    }
+    .surface-item .surface-title { font-family: var(--serif); font-size: 16px; font-weight: 400; line-height: 1.2; color: var(--ink); }
+    .surface-item .surface-meta { font-family: var(--mono); font-size: 9px; letter-spacing: 0.14em; text-transform: uppercase; color: rgba(20, 20, 20, 0.45); }
+    @media (max-width: 1000px) { .surface-grid { grid-template-columns: repeat(2, 1fr); } }
+    @media (max-width: 720px) {
+      .application { padding: 72px 0; }
+      .application-intro { margin-left: 0; margin-bottom: 48px; }
+      .surface-work-head { grid-template-columns: 1fr; gap: 12px; margin-top: 48px; }
+      .surface-grid { grid-template-columns: 1fr; }
+    }
+
+    /* Commission */
+    .commission { background: var(--bg-soft); padding: 140px 0; border-top: 1px solid var(--line); }
+    .commission-layout { display: grid; grid-template-columns: 1.1fr 0.9fr; gap: 100px; align-items: center; }
+    .commission-title { margin-top: 26px; font-family: var(--serif); font-size: clamp(3rem, 5.6vw, 5.6rem); font-weight: 300; line-height: 0.98; letter-spacing: -0.03em; color: var(--paper); }
+    .commission-title em { font-style: italic; color: var(--gold-soft); }
+    .commission-copy { max-width: 440px; color: var(--text-dim); font-size: 12.5px; line-height: 1.85; margin-bottom: 44px; }
+    .service-list { border-top: 1px solid var(--line); margin-bottom: 48px; }
+    .service-item { display: grid; grid-template-columns: 44px 1fr; gap: 20px; padding: 20px 0; border-bottom: 1px solid var(--line); align-items: baseline; }
+    .service-item .num { color: var(--gold); font-size: 10px; letter-spacing: 0.22em; }
+    .service-item .title { display: block; color: var(--paper); font-family: var(--serif); font-size: 20px; font-weight: 400; margin-bottom: 4px; }
+    .service-item .desc { color: var(--text-dim); font-size: 12px; line-height: 1.7; max-width: 40ch; }
+    .contact-cta { display: inline-flex; align-items: center; justify-content: center; min-height: 54px; padding: 0 32px; background: var(--gold); color: var(--ink); font-family: var(--mono); font-size: 10px; letter-spacing: 0.24em; text-transform: uppercase; transition: background 300ms ease; }
+    .contact-cta:hover { background: var(--gold-soft); }
+    @media (max-width: 900px) { .commission { padding: 90px 0; } .commission-layout { grid-template-columns: 1fr; gap: 60px; } }
+    @media (max-width: 720px) { .commission { padding: 72px 0; } .commission-layout { gap: 48px; } .contact-cta { width: 100%; } }
+
+    /* Mockups */
+    .mockup-gallery { margin-top: 120px; padding-top: 80px; border-top: 1px solid var(--line); }
+    .mockup-head { display: grid; grid-template-columns: 160px 1fr; gap: 40px; margin-bottom: 60px; align-items: baseline; }
+    .mockup-title { font-family: var(--serif); font-size: clamp(2rem, 3.4vw, 3.2rem); font-weight: 300; line-height: 1.05; letter-spacing: -0.02em; color: var(--paper); }
+    .mockup-title em { font-style: italic; color: var(--gold-soft); }
+    .mockup-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 32px; }
+    .mockup-item { display: flex; flex-direction: column; gap: 16px; }
+    .mockup-frame { position: relative; aspect-ratio: 4 / 3; background: #000; border: 1px solid var(--line); overflow: hidden; }
+    .mockup-frame img { width: 100%; height: 100%; object-fit: cover; display: block; transition: transform 800ms cubic-bezier(0.2, 0.8, 0.2, 1); }
+    .mockup-item:hover .mockup-frame img { transform: scale(1.04); }
+    .mockup-item figcaption { display: flex; justify-content: space-between; align-items: baseline; gap: 16px; padding-top: 4px; font-family: var(--mono); font-size: 10px; letter-spacing: 0.22em; text-transform: uppercase; }
+    .mockup-id { color: var(--paper); }
+    .mockup-seed { color: var(--gold-soft); }
+    .mockup-note { margin-top: 48px; max-width: 56ch; color: var(--text-dim); font-family: var(--serif); font-size: 1.15rem; font-style: italic; line-height: 1.6; }
+    @media (max-width: 900px) { .mockup-gallery { margin-top: 80px; padding-top: 56px; } .mockup-head { grid-template-columns: 1fr; gap: 16px; margin-bottom: 40px; } .mockup-grid { grid-template-columns: 1fr; gap: 24px; } }
+
+    /* Colophon */
+    .colophon { padding: 80px 0 60px; border-top: 1px solid var(--line); display: grid; grid-template-columns: 1.4fr 1fr 1fr 1fr; gap: 40px; font-family: var(--mono); font-size: 10px; letter-spacing: 0.20em; text-transform: uppercase; color: var(--text-faint); }
+    .colophon .col-mark { display: block; font-family: var(--serif); font-size: 22px; font-style: italic; letter-spacing: 0; text-transform: none; color: var(--paper); margin-bottom: 12px; }
+    .colophon .col-mark em { color: var(--gold-soft); }
+    .colophon .col p { color: var(--text-dim); font-size: 11px; letter-spacing: 0.1em; text-transform: none; line-height: 1.8; max-width: 30ch; }
+    .colophon .col-title { display: block; color: var(--gold-soft); margin-bottom: 16px; }
+    .colophon .col a { display: block; color: var(--text-dim); line-height: 2.1; transition: color 300ms ease; letter-spacing: 0.14em; word-break: break-word; }
+    .colophon .col a:hover { color: var(--gold-soft); }
+    .colophon-end { grid-column: 1 / -1; border-top: 1px solid var(--line); padding-top: 32px; margin-top: 32px; display: flex; justify-content: space-between; gap: 20px; flex-wrap: wrap; color: var(--text-faint); }
+    .colophon-end .mark { color: var(--gold-soft); font-family: var(--serif); font-size: 14px; font-style: italic; letter-spacing: 0; text-transform: none; }
+    @media (max-width: 900px) { .colophon { grid-template-columns: 1fr 1fr; } }
+    @media (max-width: 560px) { .colophon { grid-template-columns: 1fr 1fr; gap: 24px; } }
+    @media (max-width: 380px) { .colophon { grid-template-columns: 1fr; gap: 28px; } }
+
+    /* Legal modal */
+    .legal-modal { position: fixed; inset: 0; z-index: 200; display: none; align-items: center; justify-content: center; padding: 24px; }
+    .legal-modal.open { display: flex; }
+    .legal-overlay { position: absolute; inset: 0; background: rgba(10, 10, 10, 0.78); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); animation: legalFade 280ms ease; }
+    .legal-dialog { position: relative; width: min(560px, 100%); max-height: 82vh; overflow-y: auto; background: var(--bg-soft); border: 1px solid var(--line); padding: 48px 44px 32px; animation: legalRise 320ms cubic-bezier(0.2, 0.8, 0.2, 1); }
+    .legal-close { position: absolute; top: 14px; right: 18px; background: transparent; border: 0; color: var(--text-faint); font-size: 26px; line-height: 1; cursor: pointer; transition: color 300ms ease; }
+    .legal-close:hover { color: var(--gold-soft); }
+    .legal-eyebrow { display: inline-block; color: var(--gold-soft); font-family: var(--mono); font-size: 9px; letter-spacing: 0.24em; text-transform: uppercase; margin-bottom: 14px; }
+    .legal-title { font-family: var(--serif); font-size: clamp(1.8rem, 3vw, 2.4rem); font-weight: 300; line-height: 1.1; letter-spacing: -0.01em; color: var(--paper); margin-bottom: 24px; }
+    .legal-body { color: var(--text-dim); font-family: var(--mono); font-size: 12.5px; line-height: 1.9; }
+    .legal-body p { margin-bottom: 14px; }
+    .legal-body p:last-child { margin-bottom: 0; }
+    .legal-body strong { color: var(--text); font-weight: 500; }
+    .legal-foot { margin-top: 32px; padding-top: 20px; border-top: 1px solid var(--line); display: flex; justify-content: space-between; align-items: baseline; gap: 16px; flex-wrap: wrap; font-family: var(--mono); font-size: 9px; letter-spacing: 0.22em; text-transform: uppercase; color: var(--text-faint); }
+    .legal-foot a { color: var(--gold-soft); word-break: break-all; }
+    @keyframes legalFade { from { opacity: 0; } to { opacity: 1; } }
+    @keyframes legalRise { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
+    @media (max-width: 560px) { .legal-dialog { padding: 40px 24px 24px; } }
+
+    @media (max-width: 720px) {
+      :root { --page: min(1180px, calc(100% - 32px)); }
+      .section { padding: 72px 0; }
+      .section-head { grid-template-columns: 1fr; gap: 12px; margin-bottom: 48px; }
+      .section-title { font-size: clamp(2rem, 8vw, 3rem); }
+    }
+    @media (max-width: 400px) { :root { --page: min(1180px, calc(100% - 24px)); } }
+    @media (prefers-reduced-motion: reduce) {
+      html { scroll-behavior: auto; }
+      *, *::before, *::after { transition-duration: 0.001ms !important; animation-duration: 0.001ms !important; }
+    }
+  </style>
+</head>
+<body>
+
+<nav class="ribbon">
+  <span class="ribbon-brand">ASCII <em>Body</em></span>
+  <div class="ribbon-nav">
+    <a href="#statement">Statement</a>
+    <a href="#works">Works</a>
+    <a href="#surfaces">Surfaces</a>
+    <a href="#process">Process</a>
+    <a href="#commission">Commission</a>
+  </div>
+</nav>
+
+<header class="cover page">
+  <div class="cover-meta">
+    <span class="vol">ASCII Body — A Collection</span>
+    <span>Nine Works · p5.js · ASCII Art</span>
+  </div>
+
+  <div class="cover-body">
+    <div class="cover-text">
+      <span class="eyebrow">A collection of nine works</span>
+      <h1 class="cover-title">
+        ASCII
+        <em>Body</em>
+      </h1>
+      <p class="cover-sub">
+        Nine works drawn with characters, symbols, and code —
+        Gaia, Grapefruit, SyberLust, Brownie, Kitty, Honey,
+        Eve, Valentine, Lilith, and Venus.
+      </p>
+      <p class="cover-desc">
+        For fashion houses, textile studios and surface designers.
+        Each work is a photographic portrait transformed into ASCII
+        art via p5.js, sculpting the feminine form through the raw
+        simplicity of typographic characters. Available to license
+        individually or as a set.
+      </p>
+    </div>
+
+    <div class="cover-art">
+      <img src="images/ascii-gaia.png" alt="ASCII Gaia — generative composition" loading="eager" />
+    </div>
+  </div>
+
+  <div class="cover-foot">
+    <div>
+      <span class="k">Collection</span>
+      <span class="v">ASCII Body — Autumn 2026</span>
+    </div>
+    <div>
+      <span class="k">Works</span>
+      <span class="v">Nine · p5.js · ASCII Art</span>
+    </div>
+    <div>
+      <span class="k">Medium</span>
+      <span class="v">PNG · ASCII characters</span>
+    </div>
+  </div>
+</header>
+
+<section class="statement" id="statement">
+  <div class="page">
+    <div class="statement-inner">
+      <div class="statement-label">
+        <span class="num">00 / Statement</span>
+        Artist Statement
+      </div>
+      <div class="statement-body">
+        <p class="statement-lead">
+          A collection of nine typographic narratives —
+          <em>bodies rendered in characters, stories told in code.</em>
+        </p>
+        <p>
+          I am an Iranian-born artist working at the intersection of
+          generative code and photographic portraiture. My work begins
+          with a simple observation: the body, like a text, can be read
+          — line by line, symbol by symbol. To see is to parse. To parse
+          is to tell a story.
+        </p>
+        <p>
+          <strong>ASCII Body</strong> is a collection of nine works, each
+          a feminine body photograph transformed into ASCII art using
+          p5.js. The original images — photographed on a Nokia G20 —
+          are mapped to a character set, so that light and shadow become
+          slashes, dots, brackets, and letters. Some works read as
+          portraits; others as landscapes, dreams, or love letters.
+        </p>
+        <p>
+          Each work carries a written story — a short prose piece that
+          accompanies the composition. The stories range from mythic
+          ("a generative homage to the divine feminine") to sensual
+          ("a burst of forbidden desire") to tender ("a love letter in
+          pixels, just for you"). Together they form a set of small
+          fables told in characters and code.
+        </p>
+        <div class="statement-ai">
+          <strong>On AI tools —</strong> where I encountered technical
+          obstacles, I turned to AI tools for debugging and code
+          optimization. Every structural, aesthetic, and conceptual
+          decision remained my own.
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section page" id="works">
+  <div class="section-head">
+    <span class="section-number">01 / Works</span>
+    <h2 class="section-title">
+      Nine works,<br />
+      one <em>body.</em>
+    </h2>
+  </div>
+
+  <div class="works-grid">
+    <!-- 01 Gaia -->
+    <article class="work-card">
+      <div class="work-card-head">
+        <span class="work-card-index">01 / Still</span>
+        <span class="work-card-edition">PNG</span>
+      </div>
+      <div class="work-card-art">
+        <img src="images/ascii-gaia.png" alt="ASCII Gaia — generative composition" loading="lazy" />
+      </div>
+      <h3 class="work-card-title">
+        ASCII
+        <em>Gaia</em>
+      </h3>
+      <p class="work-card-desc">
+        A generative homage to the divine feminine. Gaia reimagines the
+        earth goddess through ASCII characters, sculpting her curves
+        and shadows in monochrome. Each execution births a new figure —
+        sometimes fragmented, always intimate. A goddess drawn not in
+        color, but in the universal language of code.
+      </p>
+      <div class="work-card-meta">
+        <div><span class="k">Primitives</span><span class="v">ASCII characters</span></div>
+        <div><span class="k">Palette</span><span class="v">Monochrome</span></div>
+        <div><span class="k">Medium</span><span class="v">p5.js</span></div>
+        <div><span class="k">Format</span><span class="v">PNG</span></div>
+      </div>
+    </article>
+
+    <!-- 02 Grapefruit -->
+    <article class="work-card">
+      <div class="work-card-head">
+        <span class="work-card-index">02 / Still</span>
+        <span class="work-card-edition">PNG</span>
+      </div>
+      <div class="work-card-art">
+        <img src="images/ascii-grapefruit.png" alt="ASCII Grapefruit — generative composition" loading="lazy" />
+      </div>
+      <h3 class="work-card-title">
+        ASCII
+        <em>Grapefruit</em>
+      </h3>
+      <p class="work-card-desc">
+        A burst of forbidden desire rendered in symbols. Bold characters
+        mimic the grapefruit's voluptuous form, while softer ones hint
+        at ruby depths. A subtle gradient, crafted through character
+        selection, evokes the blush of pink or yellow on the rind.
+        Beauty found in the unexpected, reimagined through code.
+      </p>
+      <div class="work-card-meta">
+        <div><span class="k">Primitives</span><span class="v">ASCII characters</span></div>
+        <div><span class="k">Palette</span><span class="v">Pink · Yellow</span></div>
+        <div><span class="k">Medium</span><span class="v">p5.js</span></div>
+        <div><span class="k">Format</span><span class="v">PNG</span></div>
+      </div>
+    </article>
+
+    <!-- 03 SyberLust -->
+    <article class="work-card">
+      <div class="work-card-head">
+        <span class="work-card-index">03 / Still</span>
+        <span class="work-card-edition">PNG</span>
+      </div>
+      <div class="work-card-art">
+        <img src="images/ascii-syberlust.png" alt="ASCII SyberLust — generative composition" loading="lazy" />
+      </div>
+      <h3 class="work-card-title">
+        ASCII
+        <em>SyberLust</em>
+      </h3>
+      <p class="work-card-desc">
+        A canvas spun from emerald code. A panther emerges in ASCII —
+        sleek, wild, fierce yet tender. Claws etched in digital light,
+        a heart beating in green mosaic. A testament to a love untamed,
+        forever unbound, in this emerald world where freedom's melody
+        resounds.
+      </p>
+      <div class="work-card-meta">
+        <div><span class="k">Primitives</span><span class="v">ASCII characters</span></div>
+        <div><span class="k">Palette</span><span class="v">Emerald</span></div>
+        <div><span class="k">Medium</span><span class="v">p5.js</span></div>
+        <div><span class="k">Format</span><span class="v">PNG</span></div>
+      </div>
+    </article>
+
+    <!-- 04 Brownie -->
+    <article class="work-card">
+      <div class="work-card-head">
+        <span class="work-card-index">04 / Still</span>
+        <span class="work-card-edition">PNG</span>
+      </div>
+      <div class="work-card-art">
+        <img src="images/ascii-brownie.png" alt="ASCII Brownie — generative composition" loading="lazy" />
+      </div>
+      <h3 class="work-card-title">
+        ASCII
+        <em>Brownie</em>
+      </h3>
+      <p class="work-card-desc">
+        A starry night rendered in ASCII. A single star hangs above,
+        its soft glow illuminating a brownie in the foreground. Crisp
+        edges hint at a fudgy center, while wisps of steam curl upward,
+        carrying the promise of chocolate and buttery sweetness. A
+        digital token of love and indulgence.
+      </p>
+      <div class="work-card-meta">
+        <div><span class="k">Primitives</span><span class="v">ASCII characters</span></div>
+        <div><span class="k">Palette</span><span class="v">Chocolate · Star</span></div>
+        <div><span class="k">Medium</span><span class="v">p5.js</span></div>
+        <div><span class="k">Format</span><span class="v">PNG</span></div>
+      </div>
+    </article>
+
+    <!-- 05 Kitty -->
+    <article class="work-card">
+      <div class="work-card-head">
+        <span class="work-card-index">05 / Still</span>
+        <span class="work-card-edition">PNG</span>
+      </div>
+      <div class="work-card-art">
+        <img src="images/ascii-kitty.png" alt="ASCII Kitty — generative composition" loading="lazy" />
+      </div>
+      <h3 class="work-card-title">
+        ASCII
+        <em>Kitty</em>
+      </h3>
+      <p class="work-card-desc">
+        A love letter in pixels, bathed in gentle blue. A playful kitty
+        painted in code, each line a purr. Symbols dance in moonlight's
+        glow, a pixelated heart beating within. The kitty searches for
+        its human, love's promise echoing clear in this cerulean
+        dreamscape.
+      </p>
+      <div class="work-card-meta">
+        <div><span class="k">Primitives</span><span class="v">ASCII characters</span></div>
+        <div><span class="k">Palette</span><span class="v">Cerulean blue</span></div>
+        <div><span class="k">Medium</span><span class="v">p5.js</span></div>
+        <div><span class="k">Format</span><span class="v">PNG</span></div>
+      </div>
+    </article>
+
+    <!-- 06 Honey -->
+    <article class="work-card">
+      <div class="work-card-head">
+        <span class="work-card-index">06 / Still</span>
+        <span class="work-card-edition">PNG</span>
+      </div>
+      <div class="work-card-art">
+        <img src="images/ascii-honey.png" alt="ASCII Honey — generative composition" loading="lazy" />
+      </div>
+      <h3 class="work-card-title">
+        ASCII
+        <em>Honey</em>
+      </h3>
+      <p class="work-card-desc">
+        A digital hive of creation. Each character a drop of golden
+        light, birthing a being as warm as summer sun. The code flows,
+        carving gentle curves, honey thickening — a silent tribute to
+        the bee's artistry. A self-portrait in code, a silent symphony
+        of creation.
+      </p>
+      <div class="work-card-meta">
+        <div><span class="k">Primitives</span><span class="v">ASCII characters</span></div>
+        <div><span class="k">Palette</span><span class="v">Golden</span></div>
+        <div><span class="k">Medium</span><span class="v">p5.js</span></div>
+        <div><span class="k">Format</span><span class="v">PNG</span></div>
+      </div>
+    </article>
+
+    <!-- 07 Eve -->
+    <article class="work-card">
+      <div class="work-card-head">
+        <span class="work-card-index">07 / Still</span>
+        <span class="work-card-edition">PNG</span>
+      </div>
+      <div class="work-card-art">
+        <img src="images/ascii-eve.png" alt="ASCII Eve — generative composition" loading="lazy" />
+      </div>
+      <h3 class="work-card-title">
+        ASCII
+        <em>Eve</em>
+      </h3>
+      <p class="work-card-desc">
+        A lonely coder births Eve — an ASCII sprite of starlight and
+        algorithms. They dance, pixelated dreams shared. But like a
+        flickering star, Eve dims with each interaction. Yet truth
+        glows: creation transcends form, and the language of hearts
+        echoes across all. A testament to connection and love's
+        universal code.
+      </p>
+      <div class="work-card-meta">
+        <div><span class="k">Primitives</span><span class="v">ASCII characters</span></div>
+        <div><span class="k">Palette</span><span class="v">Starlight</span></div>
+        <div><span class="k">Medium</span><span class="v">p5.js</span></div>
+        <div><span class="k">Format</span><span class="v">PNG</span></div>
+      </div>
+    </article>
+
+    <!-- 08 Valentine -->
+    <article class="work-card">
+      <div class="work-card-head">
+        <span class="work-card-index">08 / Still</span>
+        <span class="work-card-edition">PNG</span>
+      </div>
+      <div class="work-card-art">
+        <img src="images/ascii-valentine.png" alt="ASCII Valentine — generative composition" loading="lazy" />
+      </div>
+      <h3 class="work-card-title">
+        ASCII
+        <em>Valentine</em>
+      </h3>
+      <p class="work-card-desc">
+        Bathed in amethyst twilight, characters pirouette across the
+        screen, their movements orchestrated by loops and conditionals.
+        Is it the code that binds them, or a deeper magic? Love
+        transcends the physical, blossoming like a digital rose amidst
+        the symphony of amethyst code.
+      </p>
+      <div class="work-card-meta">
+        <div><span class="k">Primitives</span><span class="v">ASCII characters</span></div>
+        <div><span class="k">Palette</span><span class="v">Amethyst</span></div>
+        <div><span class="k">Medium</span><span class="v">p5.js</span></div>
+        <div><span class="k">Format</span><span class="v">PNG</span></div>
+      </div>
+    </article>
+
+    <!-- 09 Lilith -->
+    <article class="work-card">
+      <div class="work-card-head">
+        <span class="work-card-index">09 / Still</span>
+        <span class="work-card-edition">PNG</span>
+      </div>
+      <div class="work-card-art">
+        <img src="images/ascii-lilith.png" alt="ASCII Lilith — generative composition" loading="lazy" />
+      </div>
+      <h3 class="work-card-title">
+        ASCII
+        <em>Lilith</em>
+      </h3>
+      <p class="work-card-desc">
+        Lilith's allure pulsates with crimson fervor — desire, danger,
+        death. In the digital abyss, her presence intertwines with code,
+        infusing virtual characters with seductive charm. Her tendrils
+        of corruption coil, enticing users with forbidden pleasures,
+        demanding sacrificial offerings to satisfy her hunger for blood
+        and power.
+      </p>
+      <div class="work-card-meta">
+        <div><span class="k">Primitives</span><span class="v">ASCII characters</span></div>
+        <div><span class="k">Palette</span><span class="v">Crimson</span></div>
+        <div><span class="k">Medium</span><span class="v">p5.js</span></div>
+        <div><span class="k">Format</span><span class="v">PNG</span></div>
+      </div>
+    </article>
+
+    <!-- 10 Venus -->
+    <article class="work-card">
+      <div class="work-card-head">
+        <span class="work-card-index">10 / Still</span>
+        <span class="work-card-edition">PNG</span>
+      </div>
+      <div class="work-card-art">
+        <img src="images/ascii-venus.png" alt="ASCII Venus — generative composition" loading="lazy" />
+      </div>
+      <h3 class="work-card-title">
+        ASCII
+        <em>Venus</em>
+      </h3>
+      <p class="work-card-desc">
+        In the ethereal realm of code, Venus emerges as a paradigm of
+        elegance and harmony. Her algorithms dance gracefully, weaving
+        patterns of logic that mirror celestial beauty. Debugging in
+        her presence feels like a cosmic ballet. Venus embodies the
+        fusion of beauty and functionality, enchanting programmers
+        into crafting masterpieces with otherworldly allure.
+      </p>
+      <div class="work-card-meta">
+        <div><span class="k">Primitives</span><span class="v">ASCII characters</span></div>
+        <div><span class="k">Palette</span><span class="v">Celestial</span></div>
+        <div><span class="k">Medium</span><span class="v">p5.js</span></div>
+        <div><span class="k">Format</span><span class="v">PNG</span></div>
+      </div>
+    </article>
+  </div>
+</section>
+
+<section class="application" id="surfaces">
+  <div class="page">
+    <div class="section-head">
+      <span class="section-number">02 / Surfaces</span>
+      <h2 class="section-title">
+        Nine works.<br />
+        <em>Thirty-six surfaces.</em>
+      </h2>
+    </div>
+
+    <p class="application-intro">
+      Each work, presented across fabric, scarf, textile and wall —
+      <span>reproduced at different aspect ratios without loss of
+      structure.</span>
+    </p>
+
+    <!-- Work 01 — Gaia -->
+    <div class="surface-work-head">
+      <h3>ASCII <em>Gaia</em></h3>
+      <p>Four surfaces, one work. The composition is tiled to fill each aspect ratio.</p>
+    </div>
+    <div class="surface-grid">
+      <div class="surface-item">
+        <div class="surface-label"><span class="num">i</span><span>Print</span></div>
+        <div class="surface-tile" style="aspect-ratio: 1; background-image: url('images/ascii-gaia.png'); background-size: contain;"></div>
+        <div class="surface-title">Archival print</div>
+        <div class="surface-meta">1 : 1 · Cotton rag</div>
+      </div>
+      <div class="surface-item">
+        <div class="surface-label"><span class="num">ii</span><span>Scarf</span></div>
+        <div class="surface-tile" style="aspect-ratio: 3 / 1; background-image: url('images/ascii-gaia.png'); background-size: 33.33% 100%;"></div>
+        <div class="surface-title">Silk scarf</div>
+        <div class="surface-meta">3 : 1 · Twill silk</div>
+      </div>
+      <div class="surface-item">
+        <div class="surface-label"><span class="num">iii</span><span>Textile</span></div>
+        <div class="surface-tile" style="aspect-ratio: 4 / 3; background-image: url('images/ascii-gaia.png'); background-size: 50% 50%;"></div>
+        <div class="surface-title">Fabric yardage</div>
+        <div class="surface-meta">4 : 3 · Repeat tile</div>
+      </div>
+      <div class="surface-item">
+        <div class="surface-label"><span class="num">iv</span><span>Wall</span></div>
+        <div class="surface-tile" style="aspect-ratio: 2 / 3; background-image: url('images/ascii-gaia.png'); background-size: 100% 50%;"></div>
+        <div class="surface-title">Wallpaper</div>
+        <div class="surface-meta">2 : 3 · Vertical repeat</div>
+      </div>
+    </div>
+
+    <!-- Work 02 — Grapefruit -->
+    <div class="surface-work-head">
+      <h3>ASCII <em>Grapefruit</em></h3>
+      <p>Four surfaces, one work. The composition is tiled to fill each aspect ratio.</p>
+    </div>
+    <div class="surface-grid">
+      <div class="surface-item">
+        <div class="surface-label"><span class="num">i</span><span>Print</span></div>
+        <div class="surface-tile" style="aspect-ratio: 1; background-image: url('images/ascii-grapefruit.png'); background-size: contain;"></div>
+        <div class="surface-title">Archival print</div>
+        <div class="surface-meta">1 : 1 · Cotton rag</div>
+      </div>
+      <div class="surface-item">
+        <div class="surface-label"><span class="num">ii</span><span>Scarf</span></div>
+        <div class="surface-tile" style="aspect-ratio: 3 / 1; background-image: url('images/ascii-grapefruit.png'); background-size: 33.33% 100%;"></div>
+        <div class="surface-title">Silk scarf</div>
+        <div class="surface-meta">3 : 1 · Twill silk</div>
+      </div>
+      <div class="surface-item">
+        <div class="surface-label"><span class="num">iii</span><span>Textile</span></div>
+        <div class="surface-tile" style="aspect-ratio: 4 / 3; background-image: url('images/ascii-grapefruit.png'); background-size: 50% 50%;"></div>
+        <div class="surface-title">Fabric yardage</div>
+        <div class="surface-meta">4 : 3 · Repeat tile</div>
+      </div>
+      <div class="surface-item">
+        <div class="surface-label"><span class="num">iv</span><span>Wall</span></div>
+        <div class="surface-tile" style="aspect-ratio: 2 / 3; background-image: url('images/ascii-grapefruit.png'); background-size: 100% 50%;"></div>
+        <div class="surface-title">Wallpaper</div>
+        <div class="surface-meta">2 : 3 · Vertical repeat</div>
+      </div>
+    </div>
+
+    <!-- Work 03 — SyberLust -->
+    <div class="surface-work-head">
+      <h3>ASCII <em>SyberLust</em></h3>
+      <p>Four surfaces, one work. The composition is tiled to fill each aspect ratio.</p>
+    </div>
+    <div class="surface-grid">
+      <div class="surface-item">
+        <div class="surface-label"><span class="num">i</span><span>Print</span></div>
+        <div class="surface-tile" style="aspect-ratio: 1; background-image: url('images/ascii-syberlust.png'); background-size: contain;"></div>
+        <div class="surface-title">Archival print</div>
+        <div class="surface-meta">1 : 1 · Cotton rag</div>
+      </div>
+      <div class="surface-item">
+        <div class="surface-label"><span class="num">ii</span><span>Scarf</span></div>
+        <div class="surface-tile" style="aspect-ratio: 3 / 1; background-image: url('images/ascii-syberlust.png'); background-size: 33.33% 100%;"></div>
+        <div class="surface-title">Silk scarf</div>
+        <div class="surface-meta">3 : 1 · Twill silk</div>
+      </div>
+      <div class="surface-item">
+        <div class="surface-label"><span class="num">iii</span><span>Textile</span></div>
+        <div class="surface-tile" style="aspect-ratio: 4 / 3; background-image: url('images/ascii-syberlust.png'); background-size: 50% 50%;"></div>
+        <div class="surface-title">Fabric yardage</div>
+        <div class="surface-meta">4 : 3 · Repeat tile</div>
+      </div>
+      <div class="surface-item">
+        <div class="surface-label"><span class="num">iv</span><span>Wall</span></div>
+        <div class="surface-tile" style="aspect-ratio: 2 / 3; background-image: url('images/ascii-syberlust.png'); background-size: 100% 50%;"></div>
+        <div class="surface-title">Wallpaper</div>
+        <div class="surface-meta">2 : 3 · Vertical repeat</div>
+      </div>
+    </div>
+
+    <!-- Work 04 — Brownie -->
+    <div class="surface-work-head">
+      <h3>ASCII <em>Brownie</em></h3>
+      <p>Four surfaces, one work. The composition is tiled to fill each aspect ratio.</p>
+    </div>
+    <div class="surface-grid">
+      <div class="surface-item">
+        <div class="surface-label"><span class="num">i</span><span>Print</span></div>
+        <div class="surface-tile" style="aspect-ratio: 1; background-image: url('images/ascii-brownie.png'); background-size: contain;"></div>
+        <div class="surface-title">Archival print</div>
+        <div class="surface-meta">1 : 1 · Cotton rag</div>
+      </div>
+      <div class="surface-item">
+        <div class="surface-label"><span class="num">ii</span><span>Scarf</span></div>
+        <div class="surface-tile" style="aspect-ratio: 3 / 1; background-image: url('images/ascii-brownie.png'); background-size: 33.33% 100%;"></div>
+        <div class="surface-title">Silk scarf</div>
+        <div class="surface-meta">3 : 1 · Twill silk</div>
+      </div>
+      <div class="surface-item">
+        <div class="surface-label"><span class="num">iii</span><span>Textile</span></div>
+        <div class="surface-tile" style="aspect-ratio: 4 / 3; background-image: url('images/ascii-brownie.png'); background-size: 50% 50%;"></div>
+        <div class="surface-title">Fabric yardage</div>
+        <div class="surface-meta">4 : 3 · Repeat tile</div>
+      </div>
+      <div class="surface-item">
+        <div class="surface-label"><span class="num">iv</span><span>Wall</span></div>
+        <div class="surface-tile" style="aspect-ratio: 2 / 3; background-image: url('images/ascii-brownie.png'); background-size: 100% 50%;"></div>
+        <div class="surface-title">Wallpaper</div>
+        <div class="surface-meta">2 : 3 · Vertical repeat</div>
+      </div>
+    </div>
+
+    <!-- Work 05 — Kitty -->
+    <div class="surface-work-head">
+      <h3>ASCII <em>Kitty</em></h3>
+      <p>Four surfaces, one work. The composition is tiled to fill each aspect ratio.</p>
+    </div>
+    <div class="surface-grid">
+      <div class="surface-item">
+        <div class="surface-label"><span class="num">i</span><span>Print</span></div>
+        <div class="surface-tile" style="aspect-ratio: 1; background-image: url('images/ascii-kitty.png'); background-size: contain;"></div>
+        <div class="surface-title">Archival print</div>
+        <div class="surface-meta">1 : 1 · Cotton rag</div>
+      </div>
+      <div class="surface-item">
+        <div class="surface-label"><span class="num">ii</span><span>Scarf</span></div>
+        <div class="surface-tile" style="aspect-ratio: 3 / 1; background-image: url('images/ascii-kitty.png'); background-size: 33.33% 100%;"></div>
+        <div class="surface-title">Silk scarf</div>
+        <div class="surface-meta">3 : 1 · Twill silk</div>
+      </div>
+      <div class="surface-item">
+        <div class="surface-label"><span class="num">iii</span><span>Textile</span></div>
+        <div class="surface-tile" style="aspect-ratio: 4 / 3; background-image: url('images/ascii-kitty.png'); background-size: 50% 50%;"></div>
+        <div class="surface-title">Fabric yardage</div>
+        <div class="surface-meta">4 : 3 · Repeat tile</div>
+      </div>
+      <div class="surface-item">
+        <div class="surface-label"><span class="num">iv</span><span>Wall</span></div>
+        <div class="surface-tile" style="aspect-ratio: 2 / 3; background-image: url('images/ascii-kitty.png'); background-size: 100% 50%;"></div>
+        <div class="surface-title">Wallpaper</div>
+        <div class="surface-meta">2 : 3 · Vertical repeat</div>
+      </div>
+    </div>
+
+    <!-- Work 06 — Honey -->
+    <div class="surface-work-head">
+      <h3>ASCII <em>Honey</em></h3>
+      <p>Four surfaces, one work. The composition is tiled to fill each aspect ratio.</p>
+    </div>
+    <div class="surface-grid">
+      <div class="surface-item">
+        <div class="surface-label"><span class="num">i</span><span>Print</span></div>
+        <div class="surface-tile" style="aspect-ratio: 1; background-image: url('images/ascii-honey.png'); background-size: contain;"></div>
+        <div class="surface-title">Archival print</div>
+        <div class="surface-meta">1 : 1 · Cotton rag</div>
+      </div>
+      <div class="surface-item">
+        <div class="surface-label"><span class="num">ii</span><span>Scarf</span></div>
+        <div class="surface-tile" style="aspect-ratio: 3 / 1; background-image: url('images/ascii-honey.png'); background-size: 33.33% 100%;"></div>
+        <div class="surface-title">Silk scarf</div>
+        <div class="surface-meta">3 : 1 · Twill silk</div>
+      </div>
+      <div class="surface-item">
+        <div class="surface-label"><span class="num">iii</span><span>Textile</span></div>
+        <div class="surface-tile" style="aspect-ratio: 4 / 3; background-image: url('images/ascii-honey.png'); background-size: 50% 50%;"></div>
+        <div class="surface-title">Fabric yardage</div>
+        <div class="surface-meta">4 : 3 · Repeat tile</div>
+      </div>
+      <div class="surface-item">
+        <div class="surface-label"><span class="num">iv</span><span>Wall</span></div>
+        <div class="surface-tile" style="aspect-ratio: 2 / 3; background-image: url('images/ascii-honey.png'); background-size: 100% 50%;"></div>
+        <div class="surface-title">Wallpaper</div>
+        <div class="surface-meta">2 : 3 · Vertical repeat</div>
+      </div>
+    </div>
+
+    <!-- Work 07 — Eve -->
+    <div class="surface-work-head">
+      <h3>ASCII <em>Eve</em></h3>
+      <p>Four surfaces, one work. The composition is tiled to fill each aspect ratio.</p>
+    </div>
+    <div class="surface-grid">
+      <div class="surface-item">
+        <div class="surface-label"><span class="num">i</span><span>Print</span></div>
+        <div class="surface-tile" style="aspect-ratio: 1; background-image: url('images/ascii-eve.png'); background-size: contain;"></div>
+        <div class="surface-title">Archival print</div>
+        <div class="surface-meta">1 : 1 · Cotton rag</div>
+      </div>
+      <div class="surface-item">
+        <div class="surface-label"><span class="num">ii</span><span>Scarf</span></div>
+        <div class="surface-tile" style="aspect-ratio: 3 / 1; background-image: url('images/ascii-eve.png'); background-size: 33.33% 100%;"></div>
+        <div class="surface-title">Silk scarf</div>
+        <div class="surface-meta">3 : 1 · Twill silk</div>
+      </div>
+      <div class="surface-item">
+        <div class="surface-label"><span class="num">iii</span><span>Textile</span></div>
+        <div class="surface-tile" style="aspect-ratio: 4 / 3; background-image: url('images/ascii-eve.png'); background-size: 50% 50%;"></div>
+        <div class="surface-title">Fabric yardage</div>
+        <div class="surface-meta">4 : 3 · Repeat tile</div>
+      </div>
+      <div class="surface-item">
+        <div class="surface-label"><span class="num">iv</span><span>Wall</span></div>
+        <div class="surface-tile" style="aspect-ratio: 2 / 3; background-image: url('images/ascii-eve.png'); background-size: 100% 50%;"></div>
+        <div class="surface-title">Wallpaper</div>
+        <div class="surface-meta">2 : 3 · Vertical repeat</div>
+      </div>
+    </div>
+
+    <!-- Work 08 — Valentine -->
+    <div class="surface-work-head">
+      <h3>ASCII <em>Valentine</em></h3>
+      <p>Four surfaces, one work. The composition is tiled to fill each aspect ratio.</p>
+    </div>
+    <div class="surface-grid">
+      <div class="surface-item">
+        <div class="surface-label"><span class="num">i</span><span>Print</span></div>
+        <div class="surface-tile" style="aspect-ratio: 1; background-image: url('images/ascii-valentine.png'); background-size: contain;"></div>
+        <div class="surface-title">Archival print</div>
+        <div class="surface-meta">1 : 1 · Cotton rag</div>
+      </div>
+      <div class="surface-item">
+        <div class="surface-label"><span class="num">ii</span><span>Scarf</span></div>
+        <div class="surface-tile" style="aspect-ratio: 3 / 1; background-image: url('images/ascii-valentine.png'); background-size: 33.33% 100%;"></div>
+        <div class="surface-title">Silk scarf</div>
+        <div class="surface-meta">3 : 1 · Twill silk</div>
+      </div>
+      <div class="surface-item">
+        <div class="surface-label"><span class="num">iii</span><span>Textile</span></div>
+        <div class="surface-tile" style="aspect-ratio: 4 / 3; background-image: url('images/ascii-valentine.png'); background-size: 50% 50%;"></div>
+        <div class="surface-title">Fabric yardage</div>
+        <div class="surface-meta">4 : 3 · Repeat tile</div>
+      </div>
+      <div class="surface-item">
+        <div class="surface-label"><span class="num">iv</span><span>Wall</span></div>
+        <div class="surface-tile" style="aspect-ratio: 2 / 3; background-image: url('images/ascii-valentine.png'); background-size: 100% 50%;"></div>
+        <div class="surface-title">Wallpaper</div>
+        <div class="surface-meta">2 : 3 · Vertical repeat</div>
+      </div>
+    </div>
+
+    <!-- Work 09 — Lilith -->
+    <div class="surface-work-head">
+      <h3>ASCII <em>Lilith</em></h3>
+      <p>Four surfaces, one work. The composition is tiled to fill each aspect ratio.</p>
+    </div>
+    <div class="surface-grid">
+      <div class="surface-item">
+        <div class="surface-label"><span class="num">i</span><span>Print</span></div>
+        <div class="surface-tile" style="aspect-ratio: 1; background-image: url('images/ascii-lilith.png'); background-size: contain;"></div>
+        <div class="surface-title">Archival print</div>
+        <div class="surface-meta">1 : 1 · Cotton rag</div>
+      </div>
+      <div class="surface-item">
+        <div class="surface-label"><span class="num">ii</span><span>Scarf</span></div>
+        <div class="surface-tile" style="aspect-ratio: 3 / 1; background-image: url('images/ascii-lilith.png'); background-size: 33.33% 100%;"></div>
+        <div class="surface-title">Silk scarf</div>
+        <div class="surface-meta">3 : 1 · Twill silk</div>
+      </div>
+      <div class="surface-item">
+        <div class="surface-label"><span class="num">iii</span><span>Textile</span></div>
+        <div class="surface-tile" style="aspect-ratio: 4 / 3; background-image: url('images/ascii-lilith.png'); background-size: 50% 50%;"></div>
+        <div class="surface-title">Fabric yardage</div>
+        <div class="surface-meta">4 : 3 · Repeat tile</div>
+      </div>
+      <div class="surface-item">
+        <div class="surface-label"><span class="num">iv</span><span>Wall</span></div>
+        <div class="surface-tile" style="aspect-ratio: 2 / 3; background-image: url('images/ascii-lilith.png'); background-size: 100% 50%;"></div>
+        <div class="surface-title">Wallpaper</div>
+        <div class="surface-meta">2 : 3 · Vertical repeat</div>
+      </div>
+    </div>
+
+    <!-- Work 10 — Venus -->
+    <div class="surface-work-head">
+      <h3>ASCII <em>Venus</em></h3>
+      <p>Four surfaces, one work. The composition is tiled to fill each aspect ratio.</p>
+    </div>
+    <div class="surface-grid">
+      <div class="surface-item">
+        <div class="surface-label"><span class="num">i</span><span>Print</span></div>
+        <div class="surface-tile" style="aspect-ratio: 1; background-image: url('images/ascii-venus.png'); background-size: contain;"></div>
+        <div class="surface-title">Archival print</div>
+        <div class="surface-meta">1 : 1 · Cotton rag</div>
+      </div>
+      <div class="surface-item">
+        <div class="surface-label"><span class="num">ii</span><span>Scarf</span></div>
+        <div class="surface-tile" style="aspect-ratio: 3 / 1; background-image: url('images/ascii-venus.png'); background-size: 33.33% 100%;"></div>
+        <div class="surface-title">Silk scarf</div>
+        <div class="surface-meta">3 : 1 · Twill silk</div>
+      </div>
+      <div class="surface-item">
+        <div class="surface-label"><span class="num">iii</span><span>Textile</span></div>
+        <div class="surface-tile" style="aspect-ratio: 4 / 3; background-image: url('images/ascii-venus.png'); background-size: 50% 50%;"></div>
+        <div class="surface-title">Fabric yardage</div>
+        <div class="surface-meta">4 : 3 · Repeat tile</div>
+      </div>
+      <div class="surface-item">
+        <div class="surface-label"><span class="num">iv</span><span>Wall</span></div>
+        <div class="surface-tile" style="aspect-ratio: 2 / 3; background-image: url('images/ascii-venus.png'); background-size: 100% 50%;"></div>
+        <div class="surface-title">Wallpaper</div>
+        <div class="surface-meta">2 : 3 · Vertical repeat</div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<section class="section page" id="process">
+  <div class="section-head">
+    <span class="section-number">03 / Process</span>
+    <h2 class="section-title">
+      Structure<br />
+      behind the <em>body.</em>
+    </h2>
+  </div>
+
+  <div class="process-grid">
+    <article class="process-card">
+      <span class="process-number">01 / Characters</span>
+      <h3>Typographic Vocabulary</h3>
+      <p>
+        Every work is drawn from a small set of characters: slashes,
+        dots, brackets, letters, and punctuation. There is no raster
+        image, no imported texture. Each symbol is placed by code, so
+        the work is legible at any scale — from a print to a wall.
+      </p>
+    </article>
+
+    <article class="process-card">
+      <span class="process-number">02 / Story</span>
+      <h3>Each Work Has One</h3>
+      <p>
+        Every work carries a written story — a short prose piece that
+        accompanies the composition. The stories range from mythic to
+        sensual to tender. The collection is not just a set of images;
+        it is a set of fables told in characters.
+      </p>
+    </article>
+
+    <article class="process-card">
+      <span class="process-number">03 / The Body</span>
+      <h3>Feminine Form</h3>
+      <p>
+        The collection is held together by the body — the feminine
+        form, the act of looking, the transformation of flesh into
+        syntax. The title comes from the sense that these are not
+        drawings of objects, but of what the eye notices as it moves
+        across a body.
+      </p>
+    </article>
+  </div>
+</section>
+
+<section class="commission" id="commission">
+  <div class="page">
+    <div class="commission-layout">
+      <div>
+        <span class="eyebrow">For brands &amp; studios</span>
+        <h2 class="commission-title">
+          Nine works.<br />
+          One <em>body.</em>
+        </h2>
+      </div>
+      <div>
+        <p class="commission-copy">
+          ASCII Body is a collection rather than a single artwork.
+          Its typographic-narrative language can be licensed as a set,
+          commissioned as a new variation, or built into a private
+          tool for your studio's ongoing use.
+        </p>
+        <div class="service-list">
+          <div class="service-item">
+            <span class="num">i</span>
+            <div>
+              <span class="title">Collection licence</span>
+              <span class="desc">All nine works licensed together for a single-product run or an extended term.</span>
+            </div>
+          </div>
+          <div class="service-item">
+            <span class="num">ii</span>
+            <div>
+              <span class="title">Commission a work</span>
+              <span class="desc">A new composition in the same vocabulary — your body, your characters, your story.</span>
+            </div>
+          </div>
+          <div class="service-item">
+            <span class="num">iii</span>
+            <div>
+              <span class="title">Systems</span>
+              <span class="desc">A private ASCII Body tool built for your studio's ongoing use.</span>
+            </div>
+          </div>
+        </div>
+        <a class="contact-cta" href="mailto:reyhanehdaneshdoost@gmail.com?subject=ASCII%20Body%20—%20Collaboration">Begin a Conversation</a>
+      </div>
+    </div>
+
+    <div class="mockup-gallery">
+      <div class="mockup-head">
+        <span class="eyebrow">Applied · ASCII Body</span>
+        <h3 class="mockup-title">
+          The collection,<br />
+          <em>three surfaces.</em>
+        </h3>
+      </div>
+      <div class="mockup-grid">
+        <figure class="mockup-item">
+          <div class="mockup-frame">
+            <img src="images/tote.png" alt="ASCII Body tote bag — applied composition" loading="lazy" />
+          </div>
+          <figcaption>
+            <span class="mockup-id">01 / Tote</span>
+            <span class="mockup-seed">ASCII Body</span>
+          </figcaption>
+        </figure>
+        <figure class="mockup-item">
+          <div class="mockup-frame">
+            <img src="images/tee.png" alt="ASCII Body t-shirt — applied composition" loading="lazy" />
+          </div>
+          <figcaption>
+            <span class="mockup-id">02 / Apparel</span>
+            <span class="mockup-seed">ASCII Body</span>
+          </figcaption>
+        </figure>
+        <figure class="mockup-item">
+          <div class="mockup-frame">
+            <img src="images/cushion.png" alt="ASCII Body cushion — applied composition" loading="lazy" />
+          </div>
+          <figcaption>
+            <span class="mockup-id">03 / Interior</span>
+            <span class="mockup-seed">ASCII Body</span>
+          </figcaption>
+        </figure>
+      </div>
+      <p class="mockup-note">
+        Each work is drawn in p5.js from ASCII characters and
+        reproducible from source. Licensable individually or as the
+        full set.
+      </p>
+    </div>
+  </div>
+</section>
+
+<footer class="colophon page">
+  <div class="col">
+    <span class="col-mark">ASCII <em>Body</em></span>
+    <p>
+      A collection of nine computational typographic-narrative
+      compositions, published as an open series.
+    </p>
+  </div>
+  <div class="col">
+    <span class="col-title">Collection</span>
+    <a href="#statement">Statement</a>
+    <a href="#works">Works</a>
+    <a href="#surfaces">Surfaces</a>
+    <a href="#process">Process</a>
+    <a href="#commission">Commission</a>
+  </div>
+  <div class="col">
+    <span class="col-title">Works</span>
+    <a href="#">ASCII Gaia</a>
+    <a href="#">ASCII Grapefruit</a>
+    <a href="#">ASCII SyberLust</a>
+    <a href="#">ASCII Brownie</a>
+    <a href="#">ASCII Kitty</a>
+    <a href="#">ASCII Honey</a>
+    <a href="#">ASCII Eve</a>
+    <a href="#">ASCII Valentine</a>
+    <a href="#">ASCII Lilith</a>
+    <a href="#">ASCII Venus</a>
+  </div>
+  <div class="col">
+    <span class="col-title">Studio</span>
+    <a href="mailto:reyhanehdaneshdoost@gmail.com">reyhanehdaneshdoost@gmail.com</a>
+    <a href="https://reyrove.github.io/">Website</a>
+    <a href="https://www.instagram.com/rey._.rove/">Instagram</a>
+    <a href="https://www.linkedin.com/in/reyhaneh-daneshdoost-730481160/">LinkedIn</a>
+    <a href="https://x.com/reyrove">X</a>
+  </div>
+  <div class="colophon-end">
+    <span>© <span id="year"></span> ASCII Body · Nine works, one body</span>
+    <span class="mark">Computational Typographic Studies</span>
+  </div>
+</footer>
+
+<div class="legal-modal" id="legalModal" aria-hidden="true">
+  <div class="legal-overlay" data-close></div>
+  <div class="legal-dialog" role="dialog" aria-modal="true" aria-labelledby="legalTitle">
+    <button class="legal-close" type="button" data-close aria-label="Close">×</button>
+    <span class="legal-eyebrow" id="legalEyebrow">Legal</span>
+    <h3 class="legal-title" id="legalTitle">—</h3>
+    <div class="legal-body" id="legalBody"></div>
+    <div class="legal-foot">
+      <span>ASCII Body</span>
+      <a href="mailto:reyhanehdaneshdoost@gmail.com">reyhanehdaneshdoost@gmail.com</a>
+    </div>
+  </div>
+</div>
+
+<script>
+  // ============================================================
+  // ASCII BODY — COLLECTION PAGE
+  //
+  // Nine works drawn with ASCII characters in p5.js.
+  // All works are static PNG images.
+  // ============================================================
+
+  const legalContent = {
+    licensing: {
+      eyebrow: 'Legal · 01',
+      title: 'Licensing',
+      body: `<p>All nine works in ASCII Body are available for licensing individually or as a collection.</p><p>Standard licences cover single-product production runs. For commercial use, custom editions, or exclusive rights, please contact the studio directly to discuss scope and terms.</p><p>Each work is reproducible from the p5.js source, using ASCII characters.</p>`
+    },
+    terms: {
+      eyebrow: 'Legal · 02',
+      title: 'Terms',
+      body: `<p>All artwork, code, and motion systems presented in this collection are the <strong>intellectual property of the artist</strong>.</p><p>Works may not be reproduced, redistributed, resold, or adapted without a written licence.</p>`
+    },
+    credits: {
+      eyebrow: 'Legal · 03',
+      title: 'Credits',
+      body: `<p><strong>Design &amp; Code</strong><br>Reyhaneh Daneshdoost</p><p><strong>Photography</strong><br>Nokia G20</p><p><strong>Typefaces</strong><br>Cormorant Garamond · DM Mono</p><p><strong>Collection</strong><br>ASCII Body — Autumn 2026</p><p><strong>Reference</strong><br>p5.js · ASCII art</p>`
+    }
+  };
+
+  function initLegalModal() {
+    const modal = document.getElementById('legalModal');
+    const eyebrow = document.getElementById('legalEyebrow');
+    const titleEl = document.getElementById('legalTitle');
+    const bodyEl = document.getElementById('legalBody');
+    if (!modal) return;
+
+    function openLegal(key) {
+      const data = legalContent[key];
+      if (!data) return;
+      eyebrow.textContent = data.eyebrow;
+      titleEl.textContent = data.title;
+      bodyEl.innerHTML = data.body;
+      modal.classList.add('open');
+      modal.setAttribute('aria-hidden', 'false');
+      document.body.style.overflow = 'hidden';
+    }
+    function closeLegal() {
+      modal.classList.remove('open');
+      modal.setAttribute('aria-hidden', 'true');
+      document.body.style.overflow = '';
+    }
+    document.querySelectorAll('[data-legal]').forEach(link => {
+      link.addEventListener('click', e => { e.preventDefault(); openLegal(link.getAttribute('data-legal')); });
+    });
+    modal.querySelectorAll('[data-close]').forEach(el => el.addEventListener('click', closeLegal));
+    document.addEventListener('keydown', e => { if (e.key === 'Escape' && modal.classList.contains('open')) closeLegal(); });
+  }
+
+  function init() {
+    const y = document.getElementById('year');
+    if (y) y.textContent = new Date().getFullYear();
+    initLegalModal();
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', init);
+  } else {
+    init();
+  }
+</script>
+
+</body>
+</html>
